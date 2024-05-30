@@ -1,3 +1,6 @@
+using Identity.Web.Models;
+using Microsoft.EntityFrameworkCore;
+
 namespace Identity.Web
 {
     public class Program
@@ -8,6 +11,12 @@ namespace Identity.Web
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("SqlCon"));
+            });
+
+            builder.Services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<AppDbContext>();
 
             var app = builder.Build();
 
