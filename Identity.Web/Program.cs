@@ -1,3 +1,4 @@
+using Identity.Web.Extensions;
 using Identity.Web.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +17,7 @@ namespace Identity.Web
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SqlCon"));
             });
 
-            builder.Services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<AppDbContext>();
+            builder.Services.AddIdentityCustom();
 
             var app = builder.Build();
 

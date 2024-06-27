@@ -3,6 +3,12 @@
     ViewData["Title"] = "SignUp";
 }
 
+@* Bu kod sayesinde Validation etmek ücün backend-e muraciet etmeden frontend de edir *@
+@* _ValidationScriptsPartial içinde olan kodları _Layout sehifesinde RenderSectionAsync-dan bir setir yuxarida da yazmaq olar.Onda aşağıdakı lazım olmur *@
+@section Scripts{
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
+
 <div class="row">
     <div class="col-md-6 offset-md-3">
         <h2>User Sign Up</h2><br />
