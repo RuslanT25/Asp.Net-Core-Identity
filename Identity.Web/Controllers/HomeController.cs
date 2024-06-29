@@ -93,5 +93,29 @@ namespace Identity.Web.Controllers
 
             return View();
         }
+
+        public IActionResult ForgetPassword()
+        {
+            return View();  
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordVM model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "This user does not exists.");
+                return View();
+            }
+
+            string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            // meselen https://localhost:7004?userId=12213&token=aajsdfjdsalkfjkdsfj bu qaydada link duzeldir.
+            var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = user.Id, Token = passwordResetToken });
+            TempData["Success"] = "Password reset link has been sent to your email.";
+
+            return RedirectToAction(nameof(ForgetPassword));
+        }
     }
 }

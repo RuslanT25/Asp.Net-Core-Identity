@@ -1,5 +1,6 @@
 using Identity.Web.Extensions;
 using Identity.Web.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Identity.Web
@@ -18,17 +19,6 @@ namespace Identity.Web
             });
 
             builder.Services.AddIdentityCustom();
-            builder.Services.ConfigureApplicationCookie(options =>
-            {
-                CookieBuilder cookieBuilder = new()
-                {
-                    Name = "MyCookie"
-                };
-                options.LoginPath = "/Home/SignIn";
-                options.Cookie = cookieBuilder;
-                options.ExpireTimeSpan = TimeSpan.FromDays(30);
-                options.SlidingExpiration = true;
-            });
 
             var app = builder.Build();
 
@@ -45,8 +35,9 @@ namespace Identity.Web
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
+            
             app.MapControllerRoute(
                 name: "areas",
                 pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
