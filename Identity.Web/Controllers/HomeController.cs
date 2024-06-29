@@ -46,8 +46,8 @@ namespace Identity.Web.Controllers
 
             if (indentityResult.Succeeded)
             {
-                TempData["SuccessMessage"] = "Successfully logged in.";
-                return RedirectToAction(nameof(HomeController.SignUp));
+                TempData["SuccessMessage"] = "Successfully registered.";
+                return RedirectToAction(nameof(HomeController.SignIn));
             }
 
             foreach (IdentityError item in indentityResult.Errors)
@@ -76,11 +76,20 @@ namespace Identity.Web.Controllers
                 return View();
             }
 
-            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, false);
+            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
             if (signInResult.Succeeded)
             {
                 return Redirect(returnUrl);
             }
+
+            if (signInResult.IsLockedOut)
+            {
+                ModelState.AddModelError("", "You can login after 3 minutes");
+                return View();
+            }
+
+            ModelState.AddModelError("", "Incorrect credentials"); // bunu password ucun yazmisam.
+            ModelState.AddModelError("", $"Failed attempt count : {await _userManager.GetAccessFailedCountAsync(hasUser)}");
 
             return View();
         }

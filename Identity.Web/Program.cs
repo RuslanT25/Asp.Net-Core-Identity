@@ -18,6 +18,17 @@ namespace Identity.Web
             });
 
             builder.Services.AddIdentityCustom();
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                CookieBuilder cookieBuilder = new()
+                {
+                    Name = "MyCookie"
+                };
+                options.LoginPath = "/Home/SignIn";
+                options.Cookie = cookieBuilder;
+                options.ExpireTimeSpan = TimeSpan.FromDays(30);
+                options.SlidingExpiration = true;
+            });
 
             var app = builder.Build();
 
