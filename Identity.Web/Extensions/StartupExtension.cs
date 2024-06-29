@@ -1,4 +1,5 @@
-﻿using Identity.Web.Models;
+﻿using Identity.Web.Localizations;
+using Identity.Web.Models;
 using Identity.Web.Validations;
 
 namespace Identity.Web.Extensions
@@ -19,6 +20,7 @@ namespace Identity.Web.Extensions
             })
                 .AddPasswordValidator<PasswordValidator>()
                 .AddUserValidator<UserValidator>()
+                .AddErrorDescriber<LocalizatorIdentityErrorDescriber>()
                .AddEntityFrameworkStores<AppDbContext>();
         }
     }
