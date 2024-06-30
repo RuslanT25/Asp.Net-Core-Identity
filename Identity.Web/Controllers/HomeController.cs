@@ -114,7 +114,7 @@ namespace Identity.Web.Controllers
 
             string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-            // meselen https://localhost:7004?userId=12213&token=aajsdfjdsalkfjkdsfj bu qaydada link duzeldir.
+            // meselen https://localhost:7004/Home/ResetPassword?userId=<userId>&token=<token> bu qaydada link duzeldir.
             var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = user.Id, Token = passwordResetToken }, HttpContext.Request.Scheme);
 
             await _emailService.ResetPassword(passwordResetLink, user.Email);
@@ -124,6 +124,7 @@ namespace Identity.Web.Controllers
             return RedirectToAction(nameof(ForgetPassword));
         }
 
+        // methodun aldigi parametrler ForgetPassword-dan passwordResetLink bunun qurdugu query string-den avtomatik dola bilir.UserId ve Token taniyir ozu.
         public IActionResult ResetPassword(string userId, string token)
         {
             TempData["userId"] = userId;
