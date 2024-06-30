@@ -1,5 +1,7 @@
 using Identity.Web.Extensions;
 using Identity.Web.Models;
+using Identity.Web.OptionModels;
+using Identity.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +21,10 @@ namespace Identity.Web
             });
 
             builder.Services.AddIdentityCustom();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+
+            // hansi class-in constructorun-da EmailSettings class-i gonderilirse datalar appsetting.json-daki EmailSetting-den dolacaq.
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSetting"));
 
             var app = builder.Build();
 

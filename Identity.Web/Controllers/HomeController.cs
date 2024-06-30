@@ -1,4 +1,5 @@
 ﻿using Identity.Web.Models;
+using Identity.Web.Services;
 using Identity.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +13,14 @@ namespace Identity.Web.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IEmailService _emailService;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService)
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailService = emailService;
         }
 
         public IActionResult Index()
@@ -112,10 +115,50 @@ namespace Identity.Web.Controllers
             string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
 
             // meselen https://localhost:7004?userId=12213&token=aajsdfjdsalkfjkdsfj bu qaydada link duzeldir.
-            var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = user.Id, Token = passwordResetToken });
+            var passwordResetLink = Url.Action("ResetPassword", "Home", new { userId = user.Id, Token = passwordResetToken }, HttpContext.Request.Scheme);
+
+            await _emailService.ResetPassword(passwordResetLink, user.Email);
+
             TempData["Success"] = "Password reset link has been sent to your email.";
 
             return RedirectToAction(nameof(ForgetPassword));
+        }
+
+        public IActionResult ResetPassword(string userId, string token)
+        {
+            TempData["userId"] = userId;
+            TempData["token"] = token;
+
+            return View();
+        }
+
+        public async Task<IActionResult> ResetPassword(ResetPasswordVM model)
+        {
+            var userId = TempData["userId"];
+            var token = TempData["token"];
+            if (userId==null || token == null)
+            {
+                throw new Exception("Error occured");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId.ToString()!);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "User not found.");
+                return View();
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, token.ToString()!, model.Password);
+            if (result.Succeeded)
+            {
+                TempData["Success"] = "Password reset successfully";
+            }
+            else
+            {
+                ModelState.AddModelError("", result.Errors.Select(x => x.Description).ToString()!);
+            }
+
+            return View();
         }
     }
 }
