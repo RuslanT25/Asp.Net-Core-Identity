@@ -8,11 +8,10 @@
             </a>
             <ul class="dropdown-menu">
                  <li><a class="dropdown-item" asp-controller="Member" asp-action="Index">Profil</a></li>
-                 <li><a class="dropdown-item" asp-controller="Member" asp-action="PasswordChange">Change password</a></li>
+                 <li><a class="dropdown-item" asp-controller="Member" asp-action="PasswordChange">Change Password</a></li>
+                <li><a class="dropdown-item" asp-controller="Member" asp-action="EditUser">Edit User</a></li>
 
-                @*<li><a class="dropdown-item" asp-controller="Member" asp-action="UserEdit">Kullanıcı güncelle</a></li>
-
-                <li><a class="dropdown-item" asp-controller="Member" asp-action="Claims">Claims</a></li> *@
+                @*<li><a class="dropdown-item" asp-controller="Member" asp-action="Claims">Claims</a></li> *@
 
                 @* @if (User.HasClaim(x => x.Type == ClaimTypes.Role && x.Value == "admin"))
                 {

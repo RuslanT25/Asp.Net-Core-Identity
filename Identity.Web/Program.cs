@@ -4,6 +4,7 @@ using Identity.Web.OptionModels;
 using Identity.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 namespace Identity.Web
 {
@@ -25,6 +26,9 @@ namespace Identity.Web
 
             // hansi class-in constructorun-da EmailSettings class-i gonderilirse datalar appsetting.json-daki EmailSetting-den dolacaq.
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSetting"));
+
+            // Indetity.Web(CurrentDirectory) folderinin icindeki folder-ler uzerinde rahat geze bilmek ucun yazilir.
+            builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
 
             var app = builder.Build();
 

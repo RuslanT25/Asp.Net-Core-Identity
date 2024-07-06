@@ -1,8 +1,11 @@
-﻿using Identity.Web.Models;
+﻿using Azure.Core;
+using Identity.Web.Models;
 using Identity.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.FileProviders;
 
 namespace Identity.Web.Controllers
 {
@@ -11,11 +14,12 @@ namespace Identity.Web.Controllers
     {
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
-
-        public MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager)
+        private readonly IFileProvider _fileProvider;
+        public MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IFileProvider fileProvider)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _fileProvider = fileProvider;
         }
         public async Task<IActionResult> Index()
         {
@@ -68,6 +72,75 @@ namespace Identity.Web.Controllers
             await _signInManager.SignOutAsync();
             await _signInManager.PasswordSignInAsync(user!, model.PasswordNew, true, false);
             TempData["SuccessMessage"] = "Password changed successfully.";
+
+            return View();
+        }
+
+        public async Task<IActionResult> EditUser()
+        {
+            ViewBag.GenderList = new SelectList(Enum.GetNames(typeof(Gender)));
+            var user = await _userManager.FindByNameAsync(User.Identity!.Name!);
+            var model = new UserEditVM()
+            {
+                UserName = user.UserName!,
+                Email = user.Email!,
+                Phone = user.PhoneNumber!,
+                BirthDate = user.BirthDate,
+                City = user.City,
+                Gender = user.Gender
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditUser(UserEditVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
+            currentUser!.UserName = model.UserName;
+            currentUser.Email = model.Email;
+            currentUser.PhoneNumber = model.Phone;
+            currentUser.BirthDate = model.BirthDate;
+            currentUser.City = model.City;
+            currentUser.Gender = model.Gender;
+
+            if (model.Picture != null & model.Picture!.Length > 0)
+            {
+                // Identity.web(solution) içinde almaq istediyin folderin adini yazirsan. var wwwroot artiq solution icindeki folderi tutur.
+                var wwwroot = _fileProvider.GetDirectoryContents("wwwroot"); // Directory
+                var uploads = wwwroot.FirstOrDefault(x => x.Name == "uploads")?.PhysicalPath;  // string
+                if (uploads == null)
+                {
+                    return View();
+                }
+
+                var userPictures = Path.Combine(uploads, "userpictures");
+                var randomFileName = $"{Guid.NewGuid()}{Path.GetExtension(model.Picture.FileName)}";
+                var newPicturePath = Path.Combine(userPictures, randomFileName);
+
+                using var stream = new FileStream(newPicturePath, FileMode.Create);
+                await model.Picture.CopyToAsync(stream);
+
+                currentUser.Picture = randomFileName;
+            }
+
+            var result = await _userManager.UpdateAsync(currentUser);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError("", result.Errors.Select(x => x.Description).ToString()!);
+                return View();
+            }
+
+            await _userManager.UpdateSecurityStampAsync(currentUser);
+            await _signInManager.SignOutAsync();
+            await _signInManager.SignInAsync(currentUser, true);
+
+            TempData["SuccessMessage"] = "User updated successfully."; 
 
             return View();
         }
