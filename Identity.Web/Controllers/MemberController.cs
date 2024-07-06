@@ -28,7 +28,8 @@ namespace Identity.Web.Controllers
             {
                 Email = user.Email,
                 UserName = user.UserName,
-                Phone = user.PhoneNumber
+                Phone = user.PhoneNumber,
+                Picture = user.Picture
             };
 
             return View(userVM);
