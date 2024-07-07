@@ -46,6 +46,8 @@ namespace Identity.Web.Areas.Admin.Controllers
                 return View();
             }
 
+            TempData["SuccessMessage"] = "Role created successfully";
+
             return RedirectToAction(nameof(RoleController.Index));
         }
 
@@ -57,18 +59,28 @@ namespace Identity.Web.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Update(RoleVM model)
         {
-            var role = await _roleManager.FindByIdAsync(model.Id);
-            if (role == null)
-            {
-                throw new Exception("Role doesn't exists.");
-            }
-
+            var role = await _roleManager.FindByIdAsync(model.Id) ?? throw new Exception("Role doesn't exists.");
             role.Name = model.Name;
             await _roleManager.UpdateAsync(role);
 
             TempData["SuccessMessage"] = "Role updated successfully";
 
             return View();
+        }
+
+        public async Task<IActionResult> Delete(string id)
+        {
+            var role = await _roleManager.FindByIdAsync(id) ?? throw new Exception("Role doesn't exists.");
+
+            var result = await _roleManager.DeleteAsync(role);
+            if (!result.Succeeded)
+            {
+                throw new Exception("Role doesn't exists.");
+            }
+
+            TempData["SuccessMessage"] = "Role deleted successfully";
+
+            return RedirectToAction(nameof(RoleController.Index));
         }
     }
 }
