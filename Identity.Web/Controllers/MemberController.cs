@@ -145,5 +145,13 @@ namespace Identity.Web.Controllers
 
             return View();
         }
+
+        public IActionResult AccessDenied(string returnUrl)
+        {
+            string message = "You are not authorized to view this page. You can contact your administrator to get authorization.";
+            ViewBag.message = message;
+
+            return View();
+        }
     }
 }

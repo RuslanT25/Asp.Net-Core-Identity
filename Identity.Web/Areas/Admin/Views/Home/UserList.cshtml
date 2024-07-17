@@ -9,6 +9,8 @@
             <th>Id</th>
             <th>Username</th>
             <th>Email</th>
+            <th>Roles</th>
+            <th>Assign role</th>
         </tr>
     </thead>
 
@@ -19,6 +21,12 @@
                 <td>@item.Id</td>
                 <td>@item.UserName</td>
                 <td>@item.Email</td>
+                <td>
+                    <user-role-names id ="@item.Id"></user-role-names>
+                </td>
+                <td>
+                    <a asp-controller="Role" asp-action="RoleAssign" asp-route-id="@item.Id">Role Assign</a>
+                </td>
             </tr>
         }
     </tbody>

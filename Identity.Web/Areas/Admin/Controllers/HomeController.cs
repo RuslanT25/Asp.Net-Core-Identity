@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Identity.Web.Areas.Admin.Controllers
 {
-    [Authorize]
+    [Authorize(Roles ="Admin")]
     [Area("Admin")]
     public class HomeController : Controller
     {
@@ -22,6 +22,7 @@ namespace Identity.Web.Areas.Admin.Controllers
             return View();
         }
 
+        [Authorize]
         public async Task<IActionResult > UserList()
         {
             var users = await _userManager.Users.ToListAsync();

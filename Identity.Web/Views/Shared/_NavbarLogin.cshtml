@@ -1,4 +1,4 @@
-﻿@* ﻿@using System.Security.Claims; *@
+﻿@using System.Security.Claims
 @if (User.Identity!.IsAuthenticated)
 {
     <ul class="navbar-nav me-0">
@@ -13,10 +13,10 @@
 
                 @*<li><a class="dropdown-item" asp-controller="Member" asp-action="Claims">Claims</a></li> *@
 
-                @* @if (User.HasClaim(x => x.Type == ClaimTypes.Role && x.Value == "admin"))
+                @if (User.HasClaim(x => x.Type == ClaimTypes.Role && x.Value == "Admin"))
                 {
                     <li><a class="dropdown-item" asp-area="admin" asp-controller="Home" asp-action="Index">Admin</a></li>
-                } *@
+                }
 
                 <li><a class="dropdown-item"  asp-controller="Member" asp-action="logout">Logout</a></li>
 

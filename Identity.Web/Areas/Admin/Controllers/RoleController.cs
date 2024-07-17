@@ -20,6 +20,7 @@ namespace Identity.Web.Areas.Admin.Controllers
             _userManager = userManager;
         }
 
+        [Authorize(Roles ="Admin")]
         public async Task<IActionResult> Index()
         {
             var roles = await _roleManager.Roles.Select(x=>new RoleVM()
@@ -31,11 +32,13 @@ namespace Identity.Web.Areas.Admin.Controllers
             return View(roles);
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Add()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Add(RoleAddVM model)
         {
@@ -51,11 +54,13 @@ namespace Identity.Web.Areas.Admin.Controllers
             return RedirectToAction(nameof(RoleController.Index));
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Update(string id)
         {
             return View();  
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Update(RoleVM model)
         {
@@ -68,6 +73,7 @@ namespace Identity.Web.Areas.Admin.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(string id)
         {
             var role = await _roleManager.FindByIdAsync(id) ?? throw new Exception("Role doesn't exists.");
@@ -81,6 +87,52 @@ namespace Identity.Web.Areas.Admin.Controllers
             TempData["SuccessMessage"] = "Role deleted successfully";
 
             return RedirectToAction(nameof(RoleController.Index));
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RoleAssign(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            ViewBag.userId = id;
+
+            var roles = await _roleManager.Roles.ToListAsync();
+
+            var roleAssignVMs = new List<RoleAssignVM>();
+
+            var userRoles = await _userManager.GetRolesAsync(user!);
+
+            foreach (var role in roles)
+            {
+                var roleAssignVM = new RoleAssignVM() { Id = role.Id, Name = role.Name! };
+                if (userRoles.Contains(role.Name!))
+                {
+                    roleAssignVM.Exist = true;
+                }
+
+                roleAssignVMs.Add(roleAssignVM);
+            }
+
+            return View(roleAssignVMs);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> RoleAssign(string id,List<RoleAssignVM> roleAssignVMs)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            foreach (var role in roleAssignVMs)
+            {
+                if (role.Exist == true)
+                {
+                    await _userManager.AddToRoleAsync(user!, role.Name);
+                }
+                else
+                {
+                    await _userManager.RemoveFromRoleAsync(user!, role.Name);
+                }
+            }
+
+            return RedirectToAction(nameof(HomeController.UserList), "Home");
         }
     }
 }

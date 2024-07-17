@@ -20,7 +20,9 @@ namespace Identity.Web.Extensions
                 {
                     Name = "MyCookie"
                 };
-                options.LoginPath = "/Home/SignIn";
+                options.LoginPath = new PathString("/Home/SignIn");
+                options.LogoutPath = new PathString("/Member/Logout");
+                options.AccessDeniedPath = new PathString("/Member/AccessDenied");
                 options.Cookie = cookieBuilder;
                 options.ExpireTimeSpan = TimeSpan.FromDays(30);
                 options.SlidingExpiration = true;
