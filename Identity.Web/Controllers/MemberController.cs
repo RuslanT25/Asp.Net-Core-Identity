@@ -171,5 +171,11 @@ namespace Identity.Web.Controllers
         {
             return View();
         }
+
+        [Authorize(Policy = "ExchangePolicy")]
+        public IActionResult ExchangePage()
+        {
+            return View();
+        }
     }
 }

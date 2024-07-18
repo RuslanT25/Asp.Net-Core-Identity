@@ -1,5 +1,6 @@
 ﻿using Identity.Web.Localizations;
 using Identity.Web.Models;
+using Identity.Web.Requirements;
 using Identity.Web.Validations;
 using Microsoft.AspNetCore.Identity;
 
@@ -55,6 +56,12 @@ namespace Identity.Web.Extensions
                 {
                     policy.RequireClaim("city", "Baku");
                 });
+
+            services.AddAuthorizationBuilder()
+               .AddPolicy("ExchangePolicy", policy =>
+               {
+                   policy.AddRequirements(new ExchangeExpireRequirement());
+               });
         }
     }
 }

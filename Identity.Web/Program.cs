@@ -2,8 +2,10 @@ using Identity.Web.ClaimProviders;
 using Identity.Web.Extensions;
 using Identity.Web.Models;
 using Identity.Web.OptionModels;
+using Identity.Web.Requirements;
 using Identity.Web.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -33,6 +35,7 @@ namespace Identity.Web
             builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
 
             builder.Services.AddScoped<IClaimsTransformation, UserClaimTransformation>();
+            builder.Services.AddScoped<IAuthorizationHandler, ExchangeExpireRequirementHandler>();
 
             builder.Services.AddPolicy();
 

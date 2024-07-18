@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.DependencyResolver;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace Identity.Web.Controllers
 {
@@ -47,18 +48,31 @@ namespace Identity.Web.Controllers
 
             var indentityResult = await _userManager.CreateAsync(new() { UserName = request.UserName, PhoneNumber = request.Phone, Email = request.Email }, request.ConfirmPassword);
 
-            if (indentityResult.Succeeded)
+            if (!indentityResult.Succeeded)
             {
-                TempData["SuccessMessage"] = "Successfully registered.";
-                return RedirectToAction(nameof(HomeController.SignIn));
+                foreach (var item in indentityResult.Errors)
+                {
+                    ModelState.AddModelError("", item.Description);
+                }
+
+                return View();
             }
 
-            foreach (IdentityError item in indentityResult.Errors)
+            var exchangeExpireClaim = new Claim("ExchangeExpireDate", DateTime.Now.AddDays(10).ToString());
+            var user = await _userManager.FindByNameAsync(request.UserName);
+            var claimResult = await _userManager.AddClaimAsync(user!, exchangeExpireClaim);
+            if (!claimResult.Succeeded)
             {
-                ModelState.AddModelError("", item.Description);
+                foreach (var item in claimResult.Errors)
+                {
+                    ModelState.AddModelError("", item.Description);
+                }
+
+                return View();
             }
 
-            return View();
+            TempData["SuccessMessage"] = "Successfully registered.";
+            return RedirectToAction(nameof(HomeController.SignIn));
         }
 
         public IActionResult SignIn()
@@ -68,7 +82,7 @@ namespace Identity.Web.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> SignIn(SignInVM model,string? returnUrl=null)
+        public async Task<IActionResult> SignIn(SignInVM model, string? returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
@@ -104,7 +118,7 @@ namespace Identity.Web.Controllers
 
         public IActionResult ForgetPassword()
         {
-            return View();  
+            return View();
         }
 
         [HttpPost]
@@ -142,7 +156,7 @@ namespace Identity.Web.Controllers
         {
             var userId = TempData["userId"];
             var token = TempData["token"];
-            if (userId==null || token == null)
+            if (userId == null || token == null)
             {
                 throw new Exception("Error occured");
             }
