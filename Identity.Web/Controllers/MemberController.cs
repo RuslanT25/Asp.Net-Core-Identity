@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.FileProviders;
+using System.Security.Claims;
 
 namespace Identity.Web.Controllers
 {
@@ -83,7 +84,7 @@ namespace Identity.Web.Controllers
             var user = await _userManager.FindByNameAsync(User.Identity!.Name!);
             var model = new UserEditVM()
             {
-                UserName = user.UserName!,
+                UserName = user!.UserName!,
                 Email = user.Email!,
                 Phone = user.PhoneNumber!,
                 BirthDate = user.BirthDate,
@@ -102,15 +103,15 @@ namespace Identity.Web.Controllers
                 return View();
             }
 
-            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name!);
-            currentUser!.UserName = model.UserName;
-            currentUser.Email = model.Email;
-            currentUser.PhoneNumber = model.Phone;
-            currentUser.BirthDate = model.BirthDate;
-            currentUser.City = model.City;
-            currentUser.Gender = model.Gender;
+            var user = await _userManager.FindByNameAsync(User.Identity!.Name!);
+            user!.UserName = model.UserName;
+            user.Email = model.Email;
+            user.PhoneNumber = model.Phone;
+            user.BirthDate = model.BirthDate;
+            user.City = model.City;
+            user.Gender = model.Gender;
 
-            if (model.Picture != null & model.Picture!.Length > 0)
+            if (model.Picture != null && model.Picture.Length > 0)
             {
                 // Identity.web(solution) içinde almaq istediyin folderin adini yazirsan. var wwwroot artiq solution icindeki folderi tutur.
                 var wwwroot = _fileProvider.GetDirectoryContents("wwwroot"); // Directory
@@ -127,19 +128,26 @@ namespace Identity.Web.Controllers
                 using var stream = new FileStream(newPicturePath, FileMode.Create);
                 await model.Picture.CopyToAsync(stream);
 
-                currentUser.Picture = randomFileName;
+                user.Picture = randomFileName;
             }
 
-            var result = await _userManager.UpdateAsync(currentUser);
+            var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("", result.Errors.Select(x => x.Description).ToString()!);
                 return View();
             }
 
-            await _userManager.UpdateSecurityStampAsync(currentUser);
+            await _userManager.UpdateSecurityStampAsync(user);
             await _signInManager.SignOutAsync();
-            await _signInManager.SignInAsync(currentUser, true);
+            if (model.BirthDate.HasValue)
+            {
+                await _signInManager.SignInWithClaimsAsync(user, true, [new Claim("BirthDate", user.BirthDate!.Value.ToString())]);
+            }
+            else
+            {
+                await _signInManager.SignInAsync(user, true);
+            }
 
             TempData["SuccessMessage"] = "User updated successfully."; 
 
@@ -174,6 +182,12 @@ namespace Identity.Web.Controllers
 
         [Authorize(Policy = "ExchangePolicy")]
         public IActionResult ExchangePage()
+        {
+            return View();
+        }
+
+        [Authorize(Policy = "ViolencePolicy")]
+        public IActionResult ViolencePage()
         {
             return View();
         }

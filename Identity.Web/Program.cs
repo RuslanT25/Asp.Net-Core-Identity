@@ -36,6 +36,7 @@ namespace Identity.Web
 
             builder.Services.AddScoped<IClaimsTransformation, UserClaimTransformation>();
             builder.Services.AddScoped<IAuthorizationHandler, ExchangeExpireRequirementHandler>();
+            builder.Services.AddScoped<IAuthorizationHandler, ViolenceRequirementHandler>();
 
             builder.Services.AddPolicy();
 

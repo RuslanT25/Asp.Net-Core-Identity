@@ -91,17 +91,18 @@ namespace Identity.Web.Controllers
 
             returnUrl ??= Url.Action("Index", "Home");
 
-            var hasUser = await _userManager.FindByEmailAsync(model.Email);
-            if (hasUser == null)
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
             {
                 ModelState.AddModelError(string.Empty, "Incorrect credentials.");
                 return View();
             }
 
-            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
-            if (signInResult.Succeeded)
+            var signInResult = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, true);
+            if (!signInResult.Succeeded)
             {
-                return Redirect(returnUrl);
+                ModelState.AddModelError("", "Incorrect credentials"); // bunu password ucun yazmisam.
+                ModelState.AddModelError("", $"Failed attempt count : {await _userManager.GetAccessFailedCountAsync(user)}");
             }
 
             if (signInResult.IsLockedOut)
@@ -110,10 +111,12 @@ namespace Identity.Web.Controllers
                 return View();
             }
 
-            ModelState.AddModelError("", "Incorrect credentials"); // bunu password ucun yazmisam.
-            ModelState.AddModelError("", $"Failed attempt count : {await _userManager.GetAccessFailedCountAsync(hasUser)}");
+            if (user.BirthDate.HasValue)
+            {
+                await _signInManager.SignInWithClaimsAsync(user, model.RememberMe, [new Claim("BirthDate", user.BirthDate.Value.ToString())]);
+            }
 
-            return View();
+            return Redirect(returnUrl!);
         }
 
         public IActionResult ForgetPassword()

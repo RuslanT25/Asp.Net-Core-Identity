@@ -62,6 +62,12 @@ namespace Identity.Web.Extensions
                {
                    policy.AddRequirements(new ExchangeExpireRequirement());
                });
+
+            services.AddAuthorizationBuilder()
+              .AddPolicy("ViolencePolicy", policy =>
+              {
+                  policy.AddRequirements(new ViolenceRequirement() { Age = 18 });
+              });
         }
     }
 }
