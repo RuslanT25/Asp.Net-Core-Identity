@@ -11,10 +11,9 @@
                  <li><a class="dropdown-item" asp-controller="Member" asp-action="PasswordChange">Change Password</a></li>
                 <li><a class="dropdown-item" asp-controller="Member" asp-action="EditUser">Edit User</a></li>
 
-                @*<li><a class="dropdown-item" asp-controller="Member" asp-action="Claims">Claims</a></li> *@
-
                 @if (User.HasClaim(x => x.Type == ClaimTypes.Role && x.Value == "Admin"))
                 {
+                    <li><a class="dropdown-item" asp-controller="Member" asp-action="Claims">Claims</a></li>
                     <li><a class="dropdown-item" asp-area="admin" asp-controller="Home" asp-action="Index">Admin</a></li>
                 }
 

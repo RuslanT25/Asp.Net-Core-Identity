@@ -153,5 +153,17 @@ namespace Identity.Web.Controllers
 
             return View();
         }
+
+        public IActionResult Claims()
+        {
+            var userClaims = User.Claims.Select(x => new ClaimVM
+            {
+                Issuer = x.Issuer,
+                Type = x.Type,
+                Value = x.Value
+            }).ToList();
+
+            return View(userClaims);
+        }   
     }
 }
