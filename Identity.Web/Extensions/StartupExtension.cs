@@ -47,5 +47,14 @@ namespace Identity.Web.Extensions
                 .AddDefaultTokenProviders()
                .AddEntityFrameworkStores<AppDbContext>();
         }
+
+        public static void AddPolicy(this IServiceCollection services)
+        {
+            services.AddAuthorizationBuilder()
+                .AddPolicy("BakuPolicy", policy =>
+                {
+                    policy.RequireClaim("city", "Baku");
+                });
+        }
     }
 }

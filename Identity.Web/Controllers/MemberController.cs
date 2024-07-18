@@ -164,6 +164,12 @@ namespace Identity.Web.Controllers
             }).ToList();
 
             return View(userClaims);
-        }   
+        }
+
+        [Authorize(Policy ="BakuPolicy")]
+        public IActionResult BakuPage()
+        {
+            return View();
+        }
     }
 }

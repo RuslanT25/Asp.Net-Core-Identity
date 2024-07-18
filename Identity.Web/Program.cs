@@ -1,7 +1,9 @@
+using Identity.Web.ClaimProviders;
 using Identity.Web.Extensions;
 using Identity.Web.Models;
 using Identity.Web.OptionModels;
 using Identity.Web.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -29,6 +31,10 @@ namespace Identity.Web
 
             // Indetity.Web(CurrentDirectory) folderinin icindeki folder-ler uzerinde rahat geze bilmek ucun yazilir.
             builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
+
+            builder.Services.AddScoped<IClaimsTransformation, UserClaimTransformation>();
+
+            builder.Services.AddPolicy();
 
             var app = builder.Build();
 
