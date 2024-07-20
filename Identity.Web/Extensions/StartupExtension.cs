@@ -53,32 +53,32 @@ namespace Identity.Web.Extensions
 
         public static void AddPolicy(this IServiceCollection services)
         {
-            services.AddAuthorizationBuilder()
-                .AddPolicy("BakuPolicy", policy =>
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("BakuPolicy", policy =>
+                    policy.RequireClaim("city", "Baku"));
+
+                options.AddPolicy("ExchangePolicy", policy =>
+                    policy.AddRequirements(new ExchangeExpireRequirement()));
+
+                options.AddPolicy("ViolencePolicy", policy =>
+                    policy.AddRequirements(new ViolenceRequirement() { Age = 18 }));
+
+                options.AddPolicy("OrderReadAndDeleteStockDeletePolicy", policy =>
                 {
-                    policy.RequireClaim("city", "Baku");
+                    policy.RequireClaim("permission", Permissions.Order.Read);
+                    policy.RequireClaim("permission", Permissions.Order.Delete);
+                    policy.RequireClaim("permission", Permissions.Stock.Delete);
                 });
 
-            services.AddAuthorizationBuilder()
-               .AddPolicy("ExchangePolicy", policy =>
-               {
-                   policy.AddRequirements(new ExchangeExpireRequirement());
-               });
+                options.AddPolicy("Permissions.Order.Read", policy =>
+                    policy.RequireClaim("permission", Permissions.Order.Read));
 
-            services.AddAuthorizationBuilder()
-              .AddPolicy("ViolencePolicy", policy =>
-              {
-                  policy.AddRequirements(new ViolenceRequirement() { Age = 18 });
-              });
+                options.AddPolicy("Permissions.Order.Delete", policy =>
+                    policy.RequireClaim("permission", Permissions.Order.Delete));
 
-            services.AddAuthorizationBuilder()
-                .AddPolicy("OrderReadAndDeleteStockDeletePolicy", policy =>
-            {
-
-                policy.RequireClaim("permission", Permissions.Order.Read);
-                policy.RequireClaim("permission", Permissions.Order.Delete);
-                policy.RequireClaim("permission", Permissions.Stock.Delete);
-
+                options.AddPolicy("Permissions.Stock.Delete", policy =>
+                    policy.RequireClaim("permission", Permissions.Stock.Delete));
             });
         }
     }

@@ -132,6 +132,7 @@ namespace Identity.Web.Areas.Admin.Controllers
                 }
             }
 
+            // await _signInManager.RefreshSignInAsync(user);  // bunu yazsan logout olmadan da Claim-ler elave olunacaq.
             return RedirectToAction(nameof(HomeController.UserList), "Home");
         }
     }
