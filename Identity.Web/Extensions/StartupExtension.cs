@@ -1,8 +1,10 @@
 ﻿using Identity.Web.Localizations;
 using Identity.Web.Models;
+using Identity.Web.PermissionRoot;
 using Identity.Web.Requirements;
 using Identity.Web.Validations;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace Identity.Web.Extensions
 {
@@ -68,6 +70,16 @@ namespace Identity.Web.Extensions
               {
                   policy.AddRequirements(new ViolenceRequirement() { Age = 18 });
               });
+
+            services.AddAuthorizationBuilder()
+                .AddPolicy("OrderReadAndDeleteStockDeletePolicy", policy =>
+            {
+
+                policy.RequireClaim("permission", Permissions.Order.Read);
+                policy.RequireClaim("permission", Permissions.Order.Delete);
+                policy.RequireClaim("permission", Permissions.Stock.Delete);
+
+            });
         }
     }
 }
