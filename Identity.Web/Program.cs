@@ -3,6 +3,7 @@ using Identity.Web.Extensions;
 using Identity.Web.Models;
 using Identity.Web.OptionModels;
 using Identity.Web.Requirements;
+using Identity.Web.Seeds;
 using Identity.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,7 @@ namespace Identity.Web
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,12 @@ namespace Identity.Web
             builder.Services.AddPolicy();
 
             var app = builder.Build();
+
+            using(var scope = app.Services.CreateScope())
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
+                await PermissionSeed.Seed(roleManager);
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
